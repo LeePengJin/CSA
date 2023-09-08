@@ -4,26 +4,26 @@ TITLE       CSA_ASSIGNMENT      LOGIN MODULE    ;title
 .DATA                           ;declare data segment
     ;String
     ;main menu section
-    WELCOMEMESSAGE  DB  "                            WELCOME TO CYPHER CAFE", '$'
-    MAINMENU_O1 DB  "                            1. LOG IN", '$'
-    MAINMENU_O2 DB  "                            2. EXIT", '$'
+    WELCOMEMESSAGE  DB  "                            WELCOME TO CYPHER CAFE", 13, 10, '$'
+    MAINMENU_O1 DB  "                            1. LOG IN", 13, 10, '$'
+    MAINMENU_O2 DB  "                            2. EXIT", 13, 10, '$'
     MAINMENUMESSAGE DB  "PLEASE ENTER YOUR CHOICE -->", '$'
-    MAINMENU_ERROR_MESSAGE  DB  "INVALID INPUT, PLEASE TRY AGAIN!",'$'
+    MAINMENU_ERROR_MESSAGE  DB  "INVALID INPUT, PLEASE TRY AGAIN!", 13, 10, '$'
     USERNAME_DISPLAY        DB  "PLEASE ENTER USERNAME -->", '$'
     PASSWORD_DISPLAY        DB  "PLEASE ENTER PASSWORD -->", '$'
-    USERNAME    DB  "admin123",'$'
-    PASSWORD    DB  "pass1234",'$'
-    WRONG_UP_MESSAGE    DB  "Wrong Username or Password entered, Please enter again.",'$'
-    CORRECT_MESSAGE  DB  "CORRECT USERNAME",'$'
+    USERNAME    DB  "admin123", '$'
+    PASSWORD    DB  "pass1234", '$'
+    WRONG_UP_MESSAGE    DB  "Wrong Username or Password entered, Please enter again.", 13, 10, '$'
+    CORRECT_MESSAGE  DB  "CORRECT USERNAME", 13, 10, '$'
 
     ;staff menu section
-    STAFF_MENU_MESSAGE    DB  "                              *CYHPER CAFE*",'$'
-    STAFF_MENU_OPTION1    DB  "                            1. RENT COMPUTERS",'$'
-    STAFF_MENU_OPTION2    DB  "                            2. ORDER SERVICES",'$'
-    STAFF_MENU_OPTION3    DB  "                            3. CREATE REPORTS",'$'
-    STAFF_MENU_OPTION4    DB  "                            4. LOG OUT",'$'
-    STAFF_MENU_PROMT_MSG  DB  "PLEASE ENTER YOUR CHOICE -->",'$'
-    STAFF_MENU_ERROR_MSG  DB  "INVALID INPUT, PLEASE TRY AGAIN!",'$'
+    STAFF_MENU_MESSAGE    DB  "                              *CYHPER CAFE*", 13, 10, '$'
+    STAFF_MENU_OPTION1    DB  "                            1. RENT COMPUTERS", 13, 10, '$'
+    STAFF_MENU_OPTION2    DB  "                            2. ORDER SERVICES", 13, 10, '$'
+    STAFF_MENU_OPTION3    DB  "                            3. CREATE REPORTS", 13, 10, '$'
+    STAFF_MENU_OPTION4    DB  "                            4. LOG OUT", 13, 10, '$'
+    STAFF_MENU_PROMT_MSG  DB  "PLEASE ENTER YOUR CHOICE -->", '$'
+    STAFF_MENU_ERROR_MSG  DB  "INVALID INPUT, PLEASE TRY AGAIN!", 13, 10, '$'
 
     ;rent computer section
     RENT_PC_MESSAGE     DB  "HERE IS RENT PC",'$'
@@ -65,7 +65,7 @@ TITLE       CSA_ASSIGNMENT      LOGIN MODULE    ;title
 ;================================================================
 .CODE                                           ;declare code segment
 
-    MAIN PROC                                   ;start of prgram
+    MAIN PROC FAR                             ;start of prgram
 
     MOV AX,@DATA                                ;storing the address of the data segment to the ax register
     MOV DS,AX                                   ;moving the value of the ax register to ds register
@@ -74,39 +74,17 @@ TITLE       CSA_ASSIGNMENT      LOGIN MODULE    ;title
     MOV AL,02
     INT 10H                                     ;clear screen
 
-    MAINMENU:
-
+    MAINMENU PROC FAR
         MOV AH,09H                              ;prepare to display
         LEA DX,WELCOMEMESSAGE                   ;load the address of the string
-        INT 21H                                 ;proceed to display
-
-        ;new line
-        MOV AH,02H                              ;prepare to display char
-        MOV DL,CR                               ;move the char to be display
-        INT 21H                                 ;proceed to display
-        MOV DL,LF                               ;move the line feed
         INT 21H                                 ;proceed to display
 
         MOV AH,09H                              ;prepare to display
         LEA DX,MAINMENU_O1                      ;load the address of the string
         INT 21H                                 ;proceed to display
 
-        ;new line
-        MOV AH,02H                              ;prepare to display char
-        MOV DL,CR                               ;move the char to be display
-        INT 21H                                 ;proceed to display
-        MOV DL,LF                               ;move the line feed
-        INT 21H                                 ;proceed to display
-
         MOV AH,09H                              ;prepare to display
         LEA DX,MAINMENU_O2                      ;load the address of the string
-        INT 21H                                 ;proceed to display
-
-        ;new line
-        MOV AH,02H                              ;prepare to display char
-        MOV DL,CR                               ;move the char to be display
-        INT 21H                                 ;proceed to display
-        MOV DL,LF                               ;move the line feed
         INT 21H                                 ;proceed to display
 
         MOV AH,09H
@@ -117,21 +95,13 @@ TITLE       CSA_ASSIGNMENT      LOGIN MODULE    ;title
         LEA DX,MAINMENU_INPUT                   ;accept input with echo
         INT 21H                                 ;proceed to accept user input
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+        CALL FAR PTR NEW_LINE
 
         .386
         MOVZX   BX,ACTUAL_MAINMENU
         MOV SPACE_MAINMENU[BX],'$'                  ;add the '$' sign to indicate the end of the string
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+        CALL FAR PTR NEW_LINE
 
         CMP SPACE_MAINMENU[0],"1"                                ;if user input is 1, go to login module
         JE  LOGIN                  
@@ -139,185 +109,154 @@ TITLE       CSA_ASSIGNMENT      LOGIN MODULE    ;title
         CMP SPACE_MAINMENU[0],"2"                                ;if user input is 2, exit the program
         JE  EXIT
 
-        JMP MAINMENU_ERROR_INPUT
+        CALL FAR PTR MAINMENU_ERROR_INPUT
 
-    MAINMENU_ERROR_INPUT:
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+        MAINMENU_ERROR_INPUT PROC FAR
+            CALL FAR PTR NEW_LINE
 
-        MOV AH,09H
-        LEA DX,MAINMENU_ERROR_MESSAGE           ;display error message
-        INT 21H
+            MOV AH,09H
+            LEA DX,MAINMENU_ERROR_MESSAGE           ;display error message
+            INT 21H
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+            JMP MAINMENU
 
-        JMP MAINMENU
+            RET
 
-    LOGIN:
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+        MAINMENU_ERROR_INPUT ENDP
 
-        MOV AH,09H                 
-        LEA DX,USERNAME_DISPLAY         
-        INT 21H                                 ;prompt user to enter username
+        LOGIN PROC FAR
+            CALL FAR PTR NEW_LINE
 
-        MOV AH,0AH
-        LEA DX,USERNAME_INPUT
-        INT 21H                                 ;accept user input
+            MOV AH,09H                 
+            LEA DX,USERNAME_DISPLAY         
+            INT 21H                                 ;prompt user to enter username
 
-        .386
-        MOVZX   BX,ACTUAL_USERNAME 
-        MOV SPACE_USERNAME[BX],'$'              ;store username inputed
+            MOV AH,0AH
+            LEA DX,USERNAME_INPUT
+            INT 21H                                 ;accept user input
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+            .386
+            MOVZX   BX,ACTUAL_USERNAME 
+            MOV SPACE_USERNAME[BX],'$'              ;store username inputed
 
-        MOV AH,09H                 
-        LEA DX,PASSWORD_DISPLAY         
-        INT 21H                                 ;prompt user to enter password
+            CALL FAR PTR NEW_LINE
 
-        MOV AH,0AH
-        LEA DX,PASSWORD_INPUT
-        INT 21H                                 ;accept user password
+            MOV AH,09H                 
+            LEA DX,PASSWORD_DISPLAY         
+            INT 21H                                 ;prompt user to enter password
 
-        .386
-        MOVZX   BX,ACTUAL_PASSWORD 
-        MOV SPACE_PASSWORD[BX],'$'              ;store password inputed
+            MOV AH,0AH
+            LEA DX,PASSWORD_INPUT
+            INT 21H                                 ;accept user password
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+            .386
+            MOVZX   BX,ACTUAL_PASSWORD 
+            MOV SPACE_PASSWORD[BX],'$'              ;store password inputed
 
-        MOV DI,0
+            CALL FAR PTR NEW_LINE
 
-    USERNAME_LOOP:
-        ;load the character from the string
-        MOV AL,SPACE_USERNAME[DI]               ;load first character from username inputed
-        MOV BL,USERNAME[DI]                     ;load first character from valid username
+            MOV DI,0
 
-        CMP AL,BL                               ;compare both character
-        JNE INCORRECT_UP
+            CALL FAR PTR USERNAME_LOOP
 
-        CMP AL,'$'
-        JE  CHECK_USERNAME_END                  ;check whether the string has reach the end
 
-        INC DI                                  ;increment for di
 
-        JMP USERNAME_LOOP                       ;loop again to compare the next character
+        LOGIN ENDP
 
-    CHECK_USERNAME_END:
-        CMP BL,'$'                              ;check whether valid username has reach the end 
-        JNE INCORRECT_UP                        ;if not display error message
+        USERNAME_LOOP PROC FAR
+            ;load the character from the string
+            MOV AL,SPACE_USERNAME[DI]               ;load first character from username inputed
+            MOV BL,USERNAME[DI]                     ;load first character from valid username
 
-        MOV DI,0
-        JMP PASSWORD_LOOP                       ;if yes proceed to check password
+            CMP AL,BL                               ;compare both character
+            JNE INCORRECT_UP
 
-    PASSWORD_LOOP:
-        ;load the character from the string
-        MOV AL,SPACE_PASSWORD[DI]               ;load first character from password inputed
-        MOV BL,PASSWORD[DI]                     ;load first character from valid password
+            CMP AL,'$'
+            JE  CHECK_USERNAME_END                  ;check whether the string has reach the end
 
-        CMP AL,BL                               ;compare both character
-        JNE INCORRECT_UP
+            INC DI                                  ;increment for di
 
-        CMP AL,'$'
-        JE  CHECK_PASSWORD_END                  ;check whether the password inputed has reach the end
+            JMP USERNAME_LOOP                       ;loop again to compare the next character
 
-        INC DI                                  ;increment for di
+            RET
 
-        JMP PASSWORD_LOOP                       ;loop again to compare the next character
+        USERNAME_LOOP ENDP
 
-    CHECK_PASSWORD_END:
-        CMP BL,'$'                              ;check whether valid password has reach the end 
-        JNE INCORRECT_UP                        ;if not display error message
+        CHECK_USERNAME_END PROC FAR
+            CMP BL,'$'                              ;check whether valid username has reach the end 
+            JNE INCORRECT_UP                        ;if not display error message
 
-        MOV DI,0
-        JMP DISPLAY_MENU                        ;if yes proceed to let user enter menu
+            MOV DI,0
+            JMP PASSWORD_LOOP                       ;if yes proceed to check password
 
-    INCORRECT_UP:
-        MOV AH,09H
-        LEA DX, WRONG_UP_MESSAGE
-        INT 21H                                 ;display error message
+            RET
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+        CHECK_USERNAME_END ENDP
 
-        JMP LOGIN                               ;jump back to login
+        PASSWORD_LOOP PROC FAR
+            ;load the character from the string
+            MOV AL,SPACE_PASSWORD[DI]               ;load first character from password inputed
+            MOV BL,PASSWORD[DI]                     ;load first character from valid password
 
-    DISPLAY_MENU:
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+            CMP AL,BL                               ;compare both character
+            JNE INCORRECT_UP
+
+            CMP AL,'$'
+            JE  CHECK_PASSWORD_END                  ;check whether the password inputed has reach the end
+
+            INC DI                                  ;increment for di
+
+            JMP PASSWORD_LOOP                       ;loop again to compare the next character
+
+        PASSWORD_LOOP ENDP
+
+        CHECK_PASSWORD_END PROC FAR
+            CMP BL,'$'                              ;check whether valid password has reach the end 
+            JNE INCORRECT_UP                        ;if not display error message
+
+            MOV DI,0
+            CALL FAR PTR DISPLAY_MENU                        ;if yes proceed to let user enter menu
+
+            RET
+
+        CHECK_PASSWORD_END ENDP
+
+        INCORRECT_UP PROC FAR
+            MOV AH,09H
+            LEA DX, WRONG_UP_MESSAGE
+            INT 21H                                 ;display error message
+
+            CALL LOGIN                               ;jump back to login
+
+            RET
+        
+        INCORRECT_UP ENDP
+
+        RET
+    MAINMENU ENDP
+
+    DISPLAY_MENU PROC FAR
+        CALL FAR PTR NEW_LINE
 
         MOV AH,09H
         LEA DX,STAFF_MENU_MESSAGE                ;display menu message
         INT 21H
 
-        MOV AH,02H                              
-        MOV DL,CR                               
-        INT 21H                                
-        MOV DL,LF                              
-        INT 21H                                 ;perform new line
-
         MOV AH,09H                              
         LEA DX,STAFF_MENU_OPTION1                                        
         INT 21H                                 ;display menu option 1
-
-        MOV AH,02H                              
-        MOV DL,CR                               
-        INT 21H                                
-        MOV DL,LF                              
-        INT 21H                                 ;perform new line
 
         MOV AH,09H                              
         LEA DX,STAFF_MENU_OPTION2                                        
         INT 21H                                 ;display menu option 2
 
-        MOV AH,02H                              
-        MOV DL,CR                               
-        INT 21H                                
-        MOV DL,LF                              
-        INT 21H                                 ;perform new line
-
         MOV AH,09H                              
         LEA DX,STAFF_MENU_OPTION3                                        
         INT 21H                                 ;display menu option 3
 
-        MOV AH,02H                              
-        MOV DL,CR                               
-        INT 21H                                
-        MOV DL,LF                              
-        INT 21H                                 ;perform new line
-
         MOV AH,09H                              
         LEA DX,STAFF_MENU_OPTION4                                        
         INT 21H                                 ;display menu option 4
-
-        MOV AH,02H                              
-        MOV DL,CR                               
-        INT 21H                                
-        MOV DL,LF                              
-        INT 21H                                 ;perform new line
 
         MOV AH,09H                              
         LEA DX,STAFF_MENU_PROMT_MSG                                        
@@ -331,93 +270,90 @@ TITLE       CSA_ASSIGNMENT      LOGIN MODULE    ;title
         MOVZX   BX,ACTUAL_STAFF_MENU 
         MOV SPACE_STAFF_MENU[BX],'$'              ;store username inputed
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+        CALL FAR PTR NEW_LINE
 
         CMP SPACE_STAFF_MENU[0],"1"                                ;if choose 1
-        JE  RENT_PC                             ;jump to RENT_PC function
+        JE  RENT_PC                                                ;jump to RENT_PC function
 
         CMP SPACE_STAFF_MENU[0],"2"                                ;if choose 2
-        JE  ORDER_SERVICE                       ;jump to ORDER_SERVICE function
+        JE  ORDER_SERVICE                                          ;jump to ORDER_SERVICE function
 
         CMP SPACE_STAFF_MENU[0],"3"                                ;if choose 3
-        JE  REPORTS                             ;jump to REPORTS function
+        JE  REPORTS                                                ;jump to REPORTS function
 
         CMP SPACE_STAFF_MENU[0],"4"                                ;if choose 4
         MOV AH,00
         MOV AL,02
-        INT 10H                                     ;clear screen
-        JE  MAINMENU                               ;jump to back to LOGIN
+        INT 10H                                                    ;clear screen
+        JE  MAINMENU                                               ;jump to back to LOGIN
 
-        JMP STAFF_MENU_INPUT_ERROR
+        CALL FAR PTR STAFF_MENU_INPUT_ERROR
 
-    STAFF_MENU_INPUT_ERROR:
-        MOV AH,02H                              
-        MOV DL,CR                               
-        INT 21H                                
-        MOV DL,LF                              
-        INT 21H                                 ;perform new line
+        STAFF_MENU_INPUT_ERROR PROC FAR
+            CALL FAR PTR NEW_LINE
 
-        MOV AH,09H                              
-        LEA DX,STAFF_MENU_ERROR_MSG             ;display error message                                   
-        INT 21H  
+            MOV AH,09H                              
+            LEA DX,STAFF_MENU_ERROR_MSG                             ;display error message                                   
+            INT 21H  
 
-        MOV AH,02H                              
-        MOV DL,CR                               
-        INT 21H                                
-        MOV DL,LF                              
-        INT 21H                                 ;perform new line
+            JMP DISPLAY_MENU
 
-        JMP DISPLAY_MENU
+            RET
 
-    RENT_PC:
-        MOV AH,09H
-        LEA DX,RENT_PC_MESSAGE
-        INT 21H
+        STAFF_MENU_INPUT_ERROR ENDP
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+        RENT_PC PROC FAR
+            MOV AH,09H
+            LEA DX,RENT_PC_MESSAGE
+            INT 21H
 
-        JMP DISPLAY_MENU
-    
-    ORDER_SERVICE:
-        MOV AH,09H
-        LEA DX,ORDER_SERVICE_MESSAGE
-        INT 21H
+            CALL DISPLAY_MENU
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+            RET
 
-        JMP DISPLAY_MENU
+        RENT_PC ENDP
+        
+        ORDER_SERVICE PROC FAR
+            MOV AH,09H
+            LEA DX,ORDER_SERVICE_MESSAGE
+            INT 21H
 
-    REPORTS:
-        MOV AH,09H
-        LEA DX,REPORTS_MESSAGE
-        INT 21H
+            CALL DISPLAY_MENU
 
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+            RET
+
+        ORDER_SERVICE ENDP
+
+        REPORTS PROC FAR
+            MOV AH,09H
+            LEA DX,REPORTS_MESSAGE
+            INT 21H
+
+            CALL DISPLAY_MENU
+
+            RET
+
+        REPORTS ENDP
 
         JMP DISPLAY_MENU
 
-    EXIT:
-        MOV AH,02H
-        MOV DL,0DH
-        INT 21H
-        MOV DL,0AH
-        INT 21H                                 ;perform next line
+        RET
+    DISPLAY_MENU ENDP
+
+    NEW_LINE PROC FAR
+
+        MOV AH,02H                              ;prepare to display char
+        MOV DL,CR                               ;move the char to be display
+        INT 21H                                 ;proceed to display
+        MOV DL,LF                               ;move the line feed
+        INT 21H                                 ;proceed to display
+
+        RET
+
+    NEW_LINE ENDP
+
+    EXIT PROC NEAR
+        CALL FAR PTR NEW_LINE
 
         MOV AH,09H
         LEA DX,THANKYOU_MSG
@@ -425,6 +361,9 @@ TITLE       CSA_ASSIGNMENT      LOGIN MODULE    ;title
 
         MOV AX,4C00H                            ;prepare to exit
         INT 21H                                 ;carry out exit
+
+        RET
+    EXIT ENDP
 
     MAIN ENDP
 
